@@ -16,9 +16,6 @@ package com.github.liaochong.myexcel.core.pojo;
 
 import com.github.liaochong.myexcel.core.annotation.ExcelColumn;
 import com.github.liaochong.myexcel.core.annotation.ExcelModel;
-import lombok.AccessLevel;
-import lombok.Data;
-import lombok.experimental.FieldDefaults;
 
 import java.math.BigDecimal;
 
@@ -26,20 +23,50 @@ import java.math.BigDecimal;
  * @author liaochong
  * @version 1.0
  */
-@Data
-@FieldDefaults(level = AccessLevel.PRIVATE)
 @ExcelModel(sheetName = "人员信息", style = {"even->color:red;width:100px"})
 public class OddEvenStylePeople {
 
     @ExcelColumn(title = "姓名")
-    String name;
+    private String name;
 
     @ExcelColumn(title = "年龄")
-    Integer age;
+    private Integer age;
 
     @ExcelColumn(title = "是否会跳舞")
-    boolean dance;
+    private boolean dance;
 
     @ExcelColumn(title = "金钱", decimalFormat = "#,000.00")
-    BigDecimal money;
+    private BigDecimal money;
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public Integer getAge() {
+        return age;
+    }
+
+    public void setAge(Integer age) {
+        this.age = age;
+    }
+
+    public boolean isDance() {
+        return dance;
+    }
+
+    public void setDance(boolean dance) {
+        this.dance = dance;
+    }
+
+    public BigDecimal getMoney() {
+        return money;
+    }
+
+    public void setMoney(BigDecimal money) {
+        this.money = money;
+    }
 }

@@ -29,7 +29,6 @@ import com.github.liaochong.myexcel.core.converter.reader.TimestampReadConverter
 import com.github.liaochong.myexcel.exception.ExcelReadException;
 import com.github.liaochong.myexcel.exception.SaxReadException;
 import com.github.liaochong.myexcel.utils.PropertyUtil;
-import lombok.extern.slf4j.Slf4j;
 
 import java.lang.reflect.Field;
 import java.math.BigDecimal;
@@ -49,7 +48,6 @@ import java.util.function.BiFunction;
  * @author liaochong
  * @version 1.0
  */
-@Slf4j
 public class ReadConverterContext {
 
     private static final Map<Class<?>, Converter<String, ?>> READ_CONVERTERS = new HashMap<>();

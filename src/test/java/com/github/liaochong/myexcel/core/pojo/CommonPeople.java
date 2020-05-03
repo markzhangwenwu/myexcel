@@ -15,9 +15,6 @@
 package com.github.liaochong.myexcel.core.pojo;
 
 import com.github.liaochong.myexcel.core.annotation.ExcelColumn;
-import lombok.AccessLevel;
-import lombok.Data;
-import lombok.experimental.FieldDefaults;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -26,16 +23,42 @@ import java.time.LocalDateTime;
  * @author liaochong
  * @version 1.0
  */
-@Data
-@FieldDefaults(level = AccessLevel.PRIVATE)
 public class CommonPeople extends Person {
 
     @ExcelColumn(title = "当前日期", format = "yyyy/MM/dd", index = 5)
-    LocalDate localDate;
+    private LocalDate localDate;
 
     @ExcelColumn(title = "当前时间", index = 6)
-    LocalDateTime localDateTime;
+    private LocalDateTime localDateTime;
 
     @ExcelColumn(title = "小猫数目", index = 7)
-    Long cats;
+    private Long cats;
+
+    @Override
+    public LocalDate getLocalDate() {
+        return localDate;
+    }
+
+    @Override
+    public void setLocalDate(LocalDate localDate) {
+        this.localDate = localDate;
+    }
+
+    @Override
+    public LocalDateTime getLocalDateTime() {
+        return localDateTime;
+    }
+
+    @Override
+    public void setLocalDateTime(LocalDateTime localDateTime) {
+        this.localDateTime = localDateTime;
+    }
+
+    public Long getCats() {
+        return cats;
+    }
+
+    public void setCats(Long cats) {
+        this.cats = cats;
+    }
 }

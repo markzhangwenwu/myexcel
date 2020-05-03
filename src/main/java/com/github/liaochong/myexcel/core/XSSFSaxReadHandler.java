@@ -14,9 +14,10 @@
  */
 package com.github.liaochong.myexcel.core;
 
-import lombok.extern.slf4j.Slf4j;
 import org.apache.poi.ss.util.CellReference;
 import org.apache.poi.xssf.usermodel.XSSFComment;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.List;
 
@@ -26,8 +27,9 @@ import java.util.List;
  * @author liaochong
  * @version 1.0
  */
-@Slf4j
 class XSSFSaxReadHandler<T> extends AbstractReadHandler<T> implements XSSFSheetXMLHandler.SheetContentsHandler {
+
+    private static final Logger log = LoggerFactory.getLogger(XSSFSaxReadHandler.class);
 
     private int count;
     /**

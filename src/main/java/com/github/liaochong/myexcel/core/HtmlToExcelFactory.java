@@ -22,11 +22,11 @@ import com.github.liaochong.myexcel.core.parser.Td;
 import com.github.liaochong.myexcel.core.parser.Tr;
 import com.github.liaochong.myexcel.core.strategy.WidthStrategy;
 import com.github.liaochong.myexcel.utils.StringUtil;
-import lombok.NonNull;
-import lombok.extern.slf4j.Slf4j;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.IOException;
@@ -44,8 +44,9 @@ import java.util.Objects;
  * @author liaochong
  * @version 1.0
  */
-@Slf4j
 public class HtmlToExcelFactory extends AbstractExcelFactory {
+
+    private static final Logger log = LoggerFactory.getLogger(HtmlToExcelFactory.class);
 
     private HtmlTableParser htmlTableParser;
 
@@ -71,7 +72,7 @@ public class HtmlToExcelFactory extends AbstractExcelFactory {
      * @param html html字符串
      * @return HtmlToExcelFactory
      */
-    public static HtmlToExcelFactory readHtml(@NonNull String html) {
+    public static HtmlToExcelFactory readHtml(String html) {
         HtmlToExcelFactory factory = new HtmlToExcelFactory();
         factory.htmlTableParser = HtmlTableParser.of(html);
         return factory;

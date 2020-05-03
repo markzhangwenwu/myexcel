@@ -17,82 +17,77 @@ package com.github.liaochong.myexcel.core;
 import com.github.liaochong.myexcel.core.annotation.ExcelColumn;
 import com.github.liaochong.myexcel.core.constant.FileType;
 import com.github.liaochong.myexcel.core.constant.LinkType;
-import lombok.AccessLevel;
-import lombok.Getter;
-import lombok.experimental.FieldDefaults;
 
 /**
  * @author liaochong
  * @version 1.0
  */
-@Getter
-@FieldDefaults(level = AccessLevel.PRIVATE)
 public final class ExcelColumnMapping {
 
     /**
      * 列标题
      */
-    String title;
+    private String title;
 
     /**
      * 顺序，数值越大越靠后
      */
-    int order;
+    private int order;
 
     /**
      * 列索引，从零开始，不允许重复
      */
-    int index;
+    private int index;
 
     /**
      * 分组
      */
-    Class<?>[] groups;
+    private Class<?>[] groups;
 
     /**
      * 为null时默认值
      */
-    String defaultValue;
+    private String defaultValue;
 
     /**
      * 宽度
      */
-    int width;
+    private int width;
 
     /**
      * 是否强制转换成字符串
      */
-    boolean convertToString;
+    private boolean convertToString;
 
     /**
      * 格式化，时间、金额等
      */
-    String format;
+    private String format;
 
     /**
      * 样式
      */
-    String[] style;
+    private String[] style;
 
     /**
      * 链接
      */
-    LinkType linkType;
+    private LinkType linkType;
 
     /**
      * 简单映射，如"1:男,2:女"
      */
-    String mapping;
+    private String mapping;
 
     /**
      * 文件类型
      */
-    FileType fileType;
+    private FileType fileType;
 
     /**
      * 是否为公式
      */
-    boolean formula;
+    private boolean formula;
 
     public static ExcelColumnMapping mapping(ExcelColumn excelColumn) {
         ExcelColumnMapping result = new ExcelColumnMapping();
@@ -118,5 +113,109 @@ public final class ExcelColumnMapping {
         result.fileType = excelColumn.fileType();
         result.formula = excelColumn.formula();
         return result;
+    }
+
+    public String getTitle() {
+        return title;
+    }
+
+    public void setTitle(String title) {
+        this.title = title;
+    }
+
+    public int getOrder() {
+        return order;
+    }
+
+    public void setOrder(int order) {
+        this.order = order;
+    }
+
+    public int getIndex() {
+        return index;
+    }
+
+    public void setIndex(int index) {
+        this.index = index;
+    }
+
+    public Class<?>[] getGroups() {
+        return groups;
+    }
+
+    public void setGroups(Class<?>[] groups) {
+        this.groups = groups;
+    }
+
+    public String getDefaultValue() {
+        return defaultValue;
+    }
+
+    public void setDefaultValue(String defaultValue) {
+        this.defaultValue = defaultValue;
+    }
+
+    public int getWidth() {
+        return width;
+    }
+
+    public void setWidth(int width) {
+        this.width = width;
+    }
+
+    public boolean isConvertToString() {
+        return convertToString;
+    }
+
+    public void setConvertToString(boolean convertToString) {
+        this.convertToString = convertToString;
+    }
+
+    public String getFormat() {
+        return format;
+    }
+
+    public void setFormat(String format) {
+        this.format = format;
+    }
+
+    public String[] getStyle() {
+        return style;
+    }
+
+    public void setStyle(String[] style) {
+        this.style = style;
+    }
+
+    public LinkType getLinkType() {
+        return linkType;
+    }
+
+    public void setLinkType(LinkType linkType) {
+        this.linkType = linkType;
+    }
+
+    public String getMapping() {
+        return mapping;
+    }
+
+    public void setMapping(String mapping) {
+        this.mapping = mapping;
+    }
+
+    public FileType getFileType() {
+        return fileType;
+    }
+
+    public void setFileType(FileType fileType) {
+        this.fileType = fileType;
+    }
+
+    public boolean isFormula() {
+        return formula;
+    }
+
+    public void setFormula(boolean formula) {
+        this.formula = formula;
     }
 }

@@ -20,12 +20,6 @@ import com.github.liaochong.myexcel.exception.ExcelReadException;
 import com.github.liaochong.myexcel.exception.SaxReadException;
 import com.github.liaochong.myexcel.exception.StopReadException;
 import com.github.liaochong.myexcel.utils.TempFileOperator;
-import lombok.AccessLevel;
-import lombok.Getter;
-import lombok.NonNull;
-import lombok.Setter;
-import lombok.experimental.FieldDefaults;
-import lombok.extern.slf4j.Slf4j;
 import org.apache.poi.ooxml.util.SAXHelper;
 import org.apache.poi.openxml4j.exceptions.OpenXML4JException;
 import org.apache.poi.openxml4j.opc.OPCPackage;
@@ -34,6 +28,8 @@ import org.apache.poi.poifs.filesystem.FileMagic;
 import org.apache.poi.ss.usermodel.DataFormatter;
 import org.apache.poi.xssf.eventusermodel.XSSFReader;
 import org.apache.poi.xssf.model.SharedStrings;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.xml.sax.ContentHandler;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
@@ -63,8 +59,9 @@ import java.util.function.Predicate;
  * @author liaochong
  * @version 1.0
  */
-@Slf4j
 public class SaxExcelReader<T> {
+
+    private static final Logger log = LoggerFactory.getLogger(SaxExcelReader.class);
 
     private static final int DEFAULT_SHEET_INDEX = 0;
 
@@ -76,7 +73,7 @@ public class SaxExcelReader<T> {
         this.readConfig.dataType = dataType;
     }
 
-    public static <T> SaxExcelReader<T> of(@NonNull Class<T> clazz) {
+    public static <T> SaxExcelReader<T> of(Class<T> clazz) {
         return new SaxExcelReader<>(clazz);
     }
 
@@ -125,32 +122,32 @@ public class SaxExcelReader<T> {
         return this;
     }
 
-    public List<T> read(@NonNull InputStream fileInputStream) {
+    public List<T> read(InputStream fileInputStream) {
         doRead(fileInputStream);
         return result;
     }
 
-    public List<T> read(@NonNull File file) {
+    public List<T> read(File file) {
         doRead(file);
         return result;
     }
 
-    public void readThen(@NonNull InputStream fileInputStream, Consumer<T> consumer) {
+    public void readThen(InputStream fileInputStream, Consumer<T> consumer) {
         this.readConfig.consumer = consumer;
         doRead(fileInputStream);
     }
 
-    public void readThen(@NonNull File file, Consumer<T> consumer) {
+    public void readThen(File file, Consumer<T> consumer) {
         this.readConfig.consumer = consumer;
         doRead(file);
     }
 
-    public void readThen(@NonNull InputStream fileInputStream, Function<T, Boolean> function) {
+    public void readThen(InputStream fileInputStream, Function<T, Boolean> function) {
         this.readConfig.function = function;
         doRead(fileInputStream);
     }
 
-    public void readThen(@NonNull File file, Function<T, Boolean> function) {
+    public void readThen(File file, Function<T, Boolean> function) {
         this.readConfig.function = function;
         doRead(file);
     }
@@ -298,30 +295,27 @@ public class SaxExcelReader<T> {
         }
     }
 
-    @Getter
-    @Setter
-    @FieldDefaults(level = AccessLevel.PRIVATE)
     public static final class ReadConfig<T> {
 
-        Class<T> dataType;
+        private Class<T> dataType;
 
-        Set<String> sheetNames = new HashSet<>();
+        private Set<String> sheetNames = new HashSet<>();
 
-        Set<Integer> sheetIndexs = new HashSet<>();
+        private Set<Integer> sheetIndexs = new HashSet<>();
 
-        Consumer<T> consumer;
+        private Consumer<T> consumer;
 
-        Function<T, Boolean> function;
+        private Function<T, Boolean> function;
 
-        Predicate<Row> rowFilter = row -> true;
+        private Predicate<Row> rowFilter = row -> true;
 
-        Predicate<T> beanFilter = bean -> true;
+        private Predicate<T> beanFilter = bean -> true;
 
-        BiFunction<Throwable, ReadContext, Boolean> exceptionFunction = (t, c) -> false;
+        private BiFunction<Throwable, ReadContext, Boolean> exceptionFunction = (t, c) -> false;
 
-        String charset = "UTF-8";
+        private String charset = "UTF-8";
 
-        Function<String, String> trim = v -> {
+        private Function<String, String> trim = v -> {
             if (v == null) {
                 return v;
             }
@@ -330,6 +324,86 @@ public class SaxExcelReader<T> {
 
         public ReadConfig(int sheetIndex) {
             sheetIndexs.add(sheetIndex);
+        }
+
+        public Class<T> getDataType() {
+            return dataType;
+        }
+
+        public void setDataType(Class<T> dataType) {
+            this.dataType = dataType;
+        }
+
+        public Set<String> getSheetNames() {
+            return sheetNames;
+        }
+
+        public void setSheetNames(Set<String> sheetNames) {
+            this.sheetNames = sheetNames;
+        }
+
+        public Set<Integer> getSheetIndexs() {
+            return sheetIndexs;
+        }
+
+        public void setSheetIndexs(Set<Integer> sheetIndexs) {
+            this.sheetIndexs = sheetIndexs;
+        }
+
+        public Consumer<T> getConsumer() {
+            return consumer;
+        }
+
+        public void setConsumer(Consumer<T> consumer) {
+            this.consumer = consumer;
+        }
+
+        public Function<T, Boolean> getFunction() {
+            return function;
+        }
+
+        public void setFunction(Function<T, Boolean> function) {
+            this.function = function;
+        }
+
+        public Predicate<Row> getRowFilter() {
+            return rowFilter;
+        }
+
+        public void setRowFilter(Predicate<Row> rowFilter) {
+            this.rowFilter = rowFilter;
+        }
+
+        public Predicate<T> getBeanFilter() {
+            return beanFilter;
+        }
+
+        public void setBeanFilter(Predicate<T> beanFilter) {
+            this.beanFilter = beanFilter;
+        }
+
+        public BiFunction<Throwable, ReadContext, Boolean> getExceptionFunction() {
+            return exceptionFunction;
+        }
+
+        public void setExceptionFunction(BiFunction<Throwable, ReadContext, Boolean> exceptionFunction) {
+            this.exceptionFunction = exceptionFunction;
+        }
+
+        public String getCharset() {
+            return charset;
+        }
+
+        public void setCharset(String charset) {
+            this.charset = charset;
+        }
+
+        public Function<String, String> getTrim() {
+            return trim;
+        }
+
+        public void setTrim(Function<String, String> trim) {
+            this.trim = trim;
         }
     }
 }

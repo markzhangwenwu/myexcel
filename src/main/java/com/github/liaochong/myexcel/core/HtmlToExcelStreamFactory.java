@@ -23,10 +23,11 @@ import com.github.liaochong.myexcel.core.parser.Tr;
 import com.github.liaochong.myexcel.exception.ExcelBuildException;
 import com.github.liaochong.myexcel.utils.FileExportUtil;
 import com.github.liaochong.myexcel.utils.TempFileOperator;
-import lombok.extern.slf4j.Slf4j;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -53,8 +54,9 @@ import java.util.zip.ZipOutputStream;
  * @author liaochong
  * @version 1.0
  */
-@Slf4j
 class HtmlToExcelStreamFactory extends AbstractExcelFactory {
+
+    private static final Logger log = LoggerFactory.getLogger(HtmlToExcelStreamFactory.class);
 
     private static final int XLSX_MAX_ROW_COUNT = 1048576;
 

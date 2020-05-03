@@ -15,9 +15,6 @@
 package com.github.liaochong.myexcel.core.parser;
 
 import com.github.liaochong.myexcel.core.strategy.WidthStrategy;
-import lombok.AccessLevel;
-import lombok.Data;
-import lombok.experimental.FieldDefaults;
 
 /**
  * 解析配置
@@ -25,16 +22,30 @@ import lombok.experimental.FieldDefaults;
  * @author liaochong
  * @version 1.0
  */
-@Data
-@FieldDefaults(level = AccessLevel.PRIVATE)
 public class ParseConfig {
 
-    WidthStrategy widthStrategy;
+    private WidthStrategy widthStrategy;
 
-    boolean isComputeAutoWidth;
+    private boolean isComputeAutoWidth;
 
     public ParseConfig(WidthStrategy widthStrategy) {
         this.widthStrategy = widthStrategy;
         this.isComputeAutoWidth = WidthStrategy.isComputeAutoWidth(widthStrategy);
+    }
+
+    public WidthStrategy getWidthStrategy() {
+        return widthStrategy;
+    }
+
+    public void setWidthStrategy(WidthStrategy widthStrategy) {
+        this.widthStrategy = widthStrategy;
+    }
+
+    public boolean isComputeAutoWidth() {
+        return isComputeAutoWidth;
+    }
+
+    public void setComputeAutoWidth(boolean computeAutoWidth) {
+        isComputeAutoWidth = computeAutoWidth;
     }
 }

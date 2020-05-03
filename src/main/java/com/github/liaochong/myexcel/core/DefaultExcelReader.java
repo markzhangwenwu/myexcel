@@ -22,8 +22,6 @@ import com.github.liaochong.myexcel.exception.ExcelReadException;
 import com.github.liaochong.myexcel.utils.ConfigurationUtil;
 import com.github.liaochong.myexcel.utils.ReflectUtil;
 import com.github.liaochong.myexcel.utils.StringUtil;
-import lombok.NonNull;
-import lombok.extern.slf4j.Slf4j;
 import org.apache.poi.hssf.usermodel.HSSFAnchor;
 import org.apache.poi.hssf.usermodel.HSSFClientAnchor;
 import org.apache.poi.hssf.usermodel.HSSFPatriarch;
@@ -40,6 +38,8 @@ import org.apache.poi.xssf.usermodel.XSSFClientAnchor;
 import org.apache.poi.xssf.usermodel.XSSFDrawing;
 import org.apache.poi.xssf.usermodel.XSSFPicture;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.ByteArrayInputStream;
 import java.io.File;
@@ -63,8 +63,9 @@ import java.util.stream.Collectors;
  * @author liaochong
  * @version 1.0
  */
-@Slf4j
 public class DefaultExcelReader<T> {
+
+    private static final Logger log = LoggerFactory.getLogger(DefaultExcelReader.class);
 
     private static final int DEFAULT_SHEET_INDEX = 0;
 
@@ -118,7 +119,7 @@ public class DefaultExcelReader<T> {
         }
     }
 
-    public static <T> DefaultExcelReader<T> of(@NonNull Class<T> clazz) {
+    public static <T> DefaultExcelReader<T> of(Class<T> clazz) {
         return new DefaultExcelReader<>(clazz);
     }
 
@@ -136,12 +137,12 @@ public class DefaultExcelReader<T> {
         return this;
     }
 
-    public DefaultExcelReader<T> rowFilter(@NonNull Predicate<Row> rowFilter) {
+    public DefaultExcelReader<T> rowFilter(Predicate<Row> rowFilter) {
         this.rowFilter = rowFilter;
         return this;
     }
 
-    public DefaultExcelReader<T> beanFilter(@NonNull Predicate<T> beanFilter) {
+    public DefaultExcelReader<T> beanFilter(Predicate<T> beanFilter) {
         this.beanFilter = beanFilter;
         return this;
     }
@@ -156,11 +157,11 @@ public class DefaultExcelReader<T> {
         return this;
     }
 
-    public List<T> read(@NonNull InputStream fileInputStream) throws Exception {
+    public List<T> read(InputStream fileInputStream) throws Exception {
         return this.read(fileInputStream, null);
     }
 
-    public List<T> read(@NonNull InputStream fileInputStream, String password) throws Exception {
+    public List<T> read(InputStream fileInputStream, String password) throws Exception {
         Map<Integer, Field> fieldMap = ReflectUtil.getFieldMapOfExcelColumn(dataType);
         if (fieldMap.isEmpty()) {
             return Collections.emptyList();
@@ -173,11 +174,11 @@ public class DefaultExcelReader<T> {
         }
     }
 
-    public List<T> read(@NonNull File file) throws Exception {
+    public List<T> read(File file) throws Exception {
         return this.read(file, null);
     }
 
-    public List<T> read(@NonNull File file, String password) throws Exception {
+    public List<T> read(File file, String password) throws Exception {
         checkFileSuffix(file);
         Map<Integer, Field> fieldMap = ReflectUtil.getFieldMapOfExcelColumn(dataType);
         if (fieldMap.isEmpty()) {
@@ -191,11 +192,11 @@ public class DefaultExcelReader<T> {
         }
     }
 
-    public void readThen(@NonNull InputStream fileInputStream, Consumer<T> consumer) throws Exception {
+    public void readThen(InputStream fileInputStream, Consumer<T> consumer) throws Exception {
         readThen(fileInputStream, null, consumer);
     }
 
-    public void readThen(@NonNull InputStream fileInputStream, String password, Consumer<T> consumer) throws Exception {
+    public void readThen(InputStream fileInputStream, String password, Consumer<T> consumer) throws Exception {
         Map<Integer, Field> fieldMap = ReflectUtil.getFieldMapOfExcelColumn(dataType);
         if (fieldMap.isEmpty()) {
             return;
@@ -208,11 +209,11 @@ public class DefaultExcelReader<T> {
         }
     }
 
-    public void readThen(@NonNull File file, Consumer<T> consumer) throws Exception {
+    public void readThen(File file, Consumer<T> consumer) throws Exception {
         readThen(file, null, consumer);
     }
 
-    public void readThen(@NonNull File file, String password, Consumer<T> consumer) throws Exception {
+    public void readThen(File file, String password, Consumer<T> consumer) throws Exception {
         checkFileSuffix(file);
         Map<Integer, Field> fieldMap = ReflectUtil.getFieldMapOfExcelColumn(dataType);
         if (fieldMap.isEmpty()) {
@@ -226,11 +227,11 @@ public class DefaultExcelReader<T> {
         }
     }
 
-    public void readThen(@NonNull InputStream fileInputStream, Function<T, Boolean> function) throws Exception {
+    public void readThen(InputStream fileInputStream, Function<T, Boolean> function) throws Exception {
         readThen(fileInputStream, null, function);
     }
 
-    public void readThen(@NonNull InputStream fileInputStream, String password, Function<T, Boolean> function) throws Exception {
+    public void readThen(InputStream fileInputStream, String password, Function<T, Boolean> function) throws Exception {
         Map<Integer, Field> fieldMap = ReflectUtil.getFieldMapOfExcelColumn(dataType);
         if (fieldMap.isEmpty()) {
             return;
@@ -243,11 +244,11 @@ public class DefaultExcelReader<T> {
         }
     }
 
-    public void readThen(@NonNull File file, Function<T, Boolean> function) throws Exception {
+    public void readThen(File file, Function<T, Boolean> function) throws Exception {
         readThen(file, null, function);
     }
 
-    public void readThen(@NonNull File file, String password, Function<T, Boolean> function) throws Exception {
+    public void readThen(File file, String password, Function<T, Boolean> function) throws Exception {
         checkFileSuffix(file);
         Map<Integer, Field> fieldMap = ReflectUtil.getFieldMapOfExcelColumn(dataType);
         if (fieldMap.isEmpty()) {
@@ -261,7 +262,7 @@ public class DefaultExcelReader<T> {
         }
     }
 
-    private void checkFileSuffix(@NonNull File file) {
+    private void checkFileSuffix(File file) {
         if (!file.getName().endsWith(Constants.XLSX) && !file.getName().endsWith(Constants.XLS)) {
             throw new IllegalArgumentException("Support only. xls and. xlsx suffix files");
         }
@@ -273,7 +274,7 @@ public class DefaultExcelReader<T> {
         }
     }
 
-    private Sheet getSheetOfInputStream(@NonNull InputStream fileInputStream, String password) throws IOException {
+    private Sheet getSheetOfInputStream(InputStream fileInputStream, String password) throws IOException {
         if (StringUtil.isBlank(password)) {
             wb = WorkbookFactory.create(fileInputStream);
         } else {
@@ -282,7 +283,7 @@ public class DefaultExcelReader<T> {
         return getSheet();
     }
 
-    private Sheet getSheetOfFile(@NonNull File file, String password) throws IOException {
+    private Sheet getSheetOfFile(File file, String password) throws IOException {
         if (StringUtil.isBlank(password)) {
             wb = WorkbookFactory.create(file);
         } else {

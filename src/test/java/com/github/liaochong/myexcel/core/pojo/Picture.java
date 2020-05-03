@@ -15,7 +15,6 @@
 package com.github.liaochong.myexcel.core.pojo;
 
 import com.github.liaochong.myexcel.core.annotation.ExcelColumn;
-import lombok.Data;
 
 import java.io.InputStream;
 
@@ -23,9 +22,16 @@ import java.io.InputStream;
  * @author liaochong
  * @version 1.0
  */
-@Data
 public class Picture {
 
     @ExcelColumn(index = 1)
-    InputStream picture;
+    private InputStream picture;
+
+    public InputStream getPicture() {
+        return picture;
+    }
+
+    public void setPicture(InputStream picture) {
+        this.picture = picture;
+    }
 }

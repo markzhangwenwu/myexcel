@@ -14,11 +14,6 @@
  */
 package com.github.liaochong.myexcel.core;
 
-import lombok.AccessLevel;
-import lombok.Getter;
-import lombok.Setter;
-import lombok.experimental.FieldDefaults;
-
 import java.lang.reflect.Field;
 
 /**
@@ -27,26 +22,63 @@ import java.lang.reflect.Field;
  * @author liaochong
  * @version 1.0
  */
-@Getter
-@Setter
-@FieldDefaults(level = AccessLevel.PRIVATE)
 public class ReadContext<T> {
 
-    T object;
+    private T object;
 
-    Field field;
+    private Field field;
 
-    String val;
+    private String val;
 
-    int rowNum;
+    private int rowNum;
 
-    int colNum;
+    private int colNum;
 
     public void reset(T object, Field field, String val, int rowNum, int colNum) {
         this.object = object;
         this.field = field;
         this.val = val;
         this.rowNum = rowNum;
+        this.colNum = colNum;
+    }
+
+    public T getObject() {
+        return object;
+    }
+
+    public void setObject(T object) {
+        this.object = object;
+    }
+
+    public Field getField() {
+        return field;
+    }
+
+    public void setField(Field field) {
+        this.field = field;
+    }
+
+    public String getVal() {
+        return val;
+    }
+
+    public void setVal(String val) {
+        this.val = val;
+    }
+
+    public int getRowNum() {
+        return rowNum;
+    }
+
+    public void setRowNum(int rowNum) {
+        this.rowNum = rowNum;
+    }
+
+    public int getColNum() {
+        return colNum;
+    }
+
+    public void setColNum(int colNum) {
         this.colNum = colNum;
     }
 }
