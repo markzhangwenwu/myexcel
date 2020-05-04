@@ -22,9 +22,9 @@ package com.github.liaochong.myexcel.core;
  */
 public class Cell {
 
-    private int rowNum;
+    private final int rowNum;
 
-    private int colNum;
+    private final int colNum;
 
     public Cell(int rowNum, int colNum) {
         this.rowNum = rowNum;
