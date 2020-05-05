@@ -111,7 +111,7 @@ abstract class AbstractSimpleExcelBuilder {
     protected StyleParser styleParser = new StyleParser(customWidthMap);
 
     public AbstractSimpleExcelBuilder(boolean isCsvBuild) {
-        convertContext = new ConvertContext(isCsvBuild, fieldOwnership);
+        convertContext = new ConvertContext(isCsvBuild);
         configuration = convertContext.getConfiguration();
         excelColumnMappingMap = convertContext.getExcelColumnMappingMap();
     }
@@ -518,23 +518,44 @@ abstract class AbstractSimpleExcelBuilder {
      * @param <T>          泛型
      * @return 结果集
      */
-    protected <T> List<Pair<? extends Class, ?>> getRenderContent(T data, List<Field> sortedFields) {
-        return sortedFields.stream()
-                .map(field -> {
-                    Pair<? extends Class, Object> value = WriteConverterContext.convert(field, data, convertContext);
-                    if (value.getValue() != null) {
-                        return value;
+    protected <T> List<List<Pair<? extends Class, ?>>> getRenderContent(T data, List<Field> sortedFields) {
+        List<List<Pair<? extends Class, ?>>> result = new LinkedList<>();
+        List<Pair<? extends Class, ?>> rowContents = new LinkedList<>();
+        result.add(rowContents);
+        for (Field field : sortedFields) {
+            if (field.getType().isAssignableFrom(List.class)) {
+                List list = (List) this.getFieldValue(field, data);
+                for (int i = 0; i < list.size(); i++) {
+                    List<Pair<? extends Class, ?>> rowContent = result.get(i);
+                    if (rowContent == null) {
+                        rowContent = new LinkedList<>(result.get(0));
+                        result.add(rowContent);
                     }
-                    String defaultValue = defaultValueMap.get(field);
-                    if (defaultValue != null) {
-                        return Pair.of(String.class, defaultValue);
-                    }
-                    if (configuration.getDefaultValue() != null) {
-                        return Pair.of(String.class, configuration.getDefaultValue());
-                    }
-                    return value;
-                })
-                .collect(Collectors.toCollection(LinkedList::new));
+                    Object fieldValue = this.getFieldValue(field, list.get(i));
+                    doGetRenderContent(rowContent, field, fieldValue);
+                }
+            } else {
+                Object fieldValue = this.getFieldValue(field, data);
+                doGetRenderContent(rowContents, field, fieldValue);
+            }
+        }
+        return result;
+    }
+
+    private void doGetRenderContent(List<Pair<? extends Class, ?>> rowContents, Field field, Object fieldValue) {
+        Pair<? extends Class, Object> value = WriteConverterContext.convert(field, fieldValue, convertContext);
+        if (value.getValue() != null) {
+            rowContents.add(value);
+            return;
+        }
+        String defaultValue = defaultValueMap.get(field);
+        if (defaultValue != null) {
+            rowContents.add(Pair.of(String.class, defaultValue));
+            return;
+        }
+        if (configuration.getDefaultValue() != null) {
+            rowContents.add(Pair.of(String.class, configuration.getDefaultValue()));
+        }
     }
 
     protected List<Pair<? extends Class, ?>> assemblingMapContents(Map<String, Object> data) {
@@ -553,5 +574,33 @@ abstract class AbstractSimpleExcelBuilder {
             }
         }
         return contents;
+    }
+
+    private List<Object> getFieldValue(Field field, Object object) {
+        List<Field> parentFields = fieldOwnership.get(field);
+        Object parentObj = object;
+        Object result;
+        List<Object> dataList = new LinkedList<>();
+        for (int i = 0; i < parentFields.size(); i++) {
+            Field parentField = parentFields.get(i);
+            result = ReflectUtil.getFieldValue(parentObj, parentField);
+            if (result instanceof List) {
+                for (Object o : ((List) result)) {
+                    result = ReflectUtil.getFieldValue(o, parentField);
+                    if (result instanceof List) {
+
+                    } else {
+
+                    }
+                }
+            } else {
+                if (i == parentFields.size() - 1) {
+                    dataList.add(result);
+                    break;
+                }
+                parentObj = result;
+            }
+        }
+        return dataList;
     }
 }

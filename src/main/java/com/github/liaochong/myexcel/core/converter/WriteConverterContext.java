@@ -28,7 +28,6 @@ import com.github.liaochong.myexcel.core.converter.writer.LinkWriteConverter;
 import com.github.liaochong.myexcel.core.converter.writer.MappingWriteConverter;
 import com.github.liaochong.myexcel.core.converter.writer.OriginalWriteConverter;
 import com.github.liaochong.myexcel.core.converter.writer.StringWriteConverter;
-import com.github.liaochong.myexcel.utils.ReflectUtil;
 
 import javax.lang.model.type.NullType;
 import java.lang.reflect.Field;
@@ -70,8 +69,7 @@ public class WriteConverterContext {
         }
     }
 
-    public static Pair<? extends Class, Object> convert(Field field, Object object, ConvertContext convertContext) {
-        Object result = getFieldValue(field, object, convertContext);
+    public static Pair<? extends Class, Object> convert(Field field, Object result, ConvertContext convertContext) {
         if (result == null) {
             return NULL_PAIR;
         }
@@ -89,16 +87,5 @@ public class WriteConverterContext {
             }
         }
         return writeConverter.convert(field, result, convertContext);
-    }
-
-    private static Object getFieldValue(Field field, Object object, ConvertContext convertContext) {
-        List<Field> parentFields = convertContext.getFieldOwnership().get(field);
-        Object parentObj = object;
-        Object result = null;
-        for (Field parentField : parentFields) {
-            result = ReflectUtil.getFieldValue(parentObj, parentField);
-            parentObj = result;
-        }
-        return result;
     }
 }

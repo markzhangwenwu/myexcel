@@ -122,11 +122,22 @@ public class CsvBuilder<T> extends AbstractSimpleExcelBuilder implements Closeab
     private List<List<?>> getRenderContent(List<T> data) {
         List<List<?>> result = new LinkedList<>();
         for (T datum : data) {
-            List<Pair<? extends Class, ?>> resolvedDataList = isMapBuild ? this.assemblingMapContents((Map<String, Object>) datum) : this.getRenderContent(datum, filteredFields);
-            List<?> values = resolvedDataList.stream().map(Pair::getValue).collect(Collectors.toList());
-            result.add(values);
+            if (isMapBuild) {
+                List<Pair<? extends Class, ?>> resolvedDataList = this.assemblingMapContents((Map<String, Object>) datum);
+                doGetRenderContent(result, resolvedDataList);
+            } else {
+                List<List<Pair<? extends Class, ?>>> resolvedDataList = this.getRenderContent(datum, filteredFields);
+                for (List<Pair<? extends Class, ?>> resolveData : resolvedDataList) {
+                    doGetRenderContent(result, resolveData);
+                }
+            }
         }
         return result;
+    }
+
+    private void doGetRenderContent(List<List<?>> result, List<Pair<? extends Class, ?>> resolvedDataList) {
+        List<?> values = resolvedDataList.stream().map(Pair::getValue).collect(Collectors.toList());
+        result.add(values);
     }
 
     private void writeToCsv(List<List<?>> data) {
