@@ -19,6 +19,7 @@ import com.github.liaochong.myexcel.core.constant.CsvConverter;
 
 import java.lang.reflect.Field;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -42,8 +43,15 @@ public class ConvertContext {
 
     private boolean isConvertCsv;
 
+    private Map<Field, List<Field>> fieldOwnership;
+
     public ConvertContext(boolean isConvertCsv) {
+        this(isConvertCsv, null);
+    }
+
+    public ConvertContext(boolean isConvertCsv, Map<Field, List<Field>> fieldOwnership) {
         this.isConvertCsv = isConvertCsv;
+        this.fieldOwnership = fieldOwnership;
         this.converterType = isConvertCsv ? CsvConverter.class : AllConverter.class;
     }
 
@@ -77,5 +85,13 @@ public class ConvertContext {
 
     public void setConvertCsv(boolean convertCsv) {
         isConvertCsv = convertCsv;
+    }
+
+    public Map<Field, List<Field>> getFieldOwnership() {
+        return fieldOwnership;
+    }
+
+    public void setFieldOwnership(Map<Field, List<Field>> fieldOwnership) {
+        this.fieldOwnership = fieldOwnership;
     }
 }

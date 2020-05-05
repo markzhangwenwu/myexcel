@@ -111,7 +111,7 @@ abstract class AbstractSimpleExcelBuilder {
     protected StyleParser styleParser = new StyleParser(customWidthMap);
 
     public AbstractSimpleExcelBuilder(boolean isCsvBuild) {
-        convertContext = new ConvertContext(isCsvBuild);
+        convertContext = new ConvertContext(isCsvBuild, fieldOwnership);
         configuration = convertContext.getConfiguration();
         excelColumnMappingMap = convertContext.getExcelColumnMappingMap();
     }
