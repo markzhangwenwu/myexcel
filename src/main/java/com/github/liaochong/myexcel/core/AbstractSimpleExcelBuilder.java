@@ -104,7 +104,7 @@ abstract class AbstractSimpleExcelBuilder {
 
     private Map<Field, ExcelColumnMapping> excelColumnMappingMap;
 
-    private final List<Field> parentFields = new LinkedList<>();
+    private List<Field> parentFields = new LinkedList<>();
 
     private final Map<Field, List<Field>> fieldOwnership = new HashMap<>();
 
@@ -134,6 +134,7 @@ abstract class AbstractSimpleExcelBuilder {
                     .collect(Collectors.toList());
         } else {
             this.parsePreElectionFields(classFieldContainer, preElectionFields);
+            this.parentFields = null;
         }
         List<Field> buildFields = this.getGroupFields(preElectionFields, groups);
         // 初始化标题容器
@@ -485,11 +486,7 @@ abstract class AbstractSimpleExcelBuilder {
             boolean isMultiColumn = field.isAnnotationPresent(MultiColumn.class);
             if (!isMultiColumn) {
                 preElectionFields.add(field);
-                if (parentFields.isEmpty()) {
-                    fieldOwnership.put(field, Collections.emptyList());
-                } else {
-                    fieldOwnership.put(field, new LinkedList<>(parentFields));
-                }
+                fieldOwnership.put(field, new LinkedList<>(parentFields));
             } else {
                 Class<?> classType = field.getAnnotation(MultiColumn.class).classType();
                 ClassFieldContainer multiClassFieldContainer = ReflectUtil.getAllFieldsOfClass(classType);
