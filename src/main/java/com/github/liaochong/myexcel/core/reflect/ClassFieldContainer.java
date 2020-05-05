@@ -42,10 +42,10 @@ public class ClassFieldContainer {
         return this.getFieldByName(fieldName, this);
     }
 
-    public List<Field> getFieldsByAnnotation(Class<? extends Annotation> annotationClass) {
+    public List<Field> getFieldsByAnnotation(Class<? extends Annotation>... annotationClass) {
         Objects.requireNonNull(annotationClass);
         List<Field> annotationFields = new ArrayList<>();
-        this.getFieldsByAnnotation(this, annotationClass, annotationFields);
+        this.getFieldsByAnnotation(this, annotationFields, annotationClass);
         return annotationFields;
     }
 
@@ -63,12 +63,20 @@ public class ClassFieldContainer {
         filterFields(classFieldContainer.getDeclaredFields(), fields);
     }
 
-    private void getFieldsByAnnotation(ClassFieldContainer classFieldContainer, Class<? extends Annotation> annotationClass, List<Field> annotationFieldContainer) {
+    private void getFieldsByAnnotation(ClassFieldContainer classFieldContainer, List<Field> annotationFieldContainer, Class<? extends Annotation>... annotationClass) {
         ClassFieldContainer parentContainer = classFieldContainer.getParent();
         if (parentContainer != null) {
-            this.getFieldsByAnnotation(parentContainer, annotationClass, annotationFieldContainer);
+            this.getFieldsByAnnotation(parentContainer, annotationFieldContainer, annotationClass);
         }
-        List<Field> annotationFields = classFieldContainer.declaredFields.stream().filter(field -> field.isAnnotationPresent(annotationClass)).collect(Collectors.toList());
+        List<Field> annotationFields = classFieldContainer.declaredFields.stream().filter(field -> {
+            for (Class<? extends Annotation> aClass : annotationClass) {
+                boolean hasAnnotation = field.isAnnotationPresent(aClass);
+                if (hasAnnotation) {
+                    return true;
+                }
+            }
+            return false;
+        }).collect(Collectors.toList());
         filterFields(annotationFields, annotationFieldContainer);
     }
 

@@ -17,6 +17,7 @@ package com.github.liaochong.myexcel.core;
 import com.github.liaochong.myexcel.core.annotation.ExcelColumn;
 import com.github.liaochong.myexcel.core.annotation.ExcludeColumn;
 import com.github.liaochong.myexcel.core.annotation.IgnoreColumn;
+import com.github.liaochong.myexcel.core.annotation.MultiColumn;
 import com.github.liaochong.myexcel.core.constant.BooleanDropDownList;
 import com.github.liaochong.myexcel.core.constant.Constants;
 import com.github.liaochong.myexcel.core.constant.DropDownList;
@@ -103,8 +104,11 @@ abstract class AbstractSimpleExcelBuilder {
 
     private Map<Field, ExcelColumnMapping> excelColumnMappingMap;
 
-    protected StyleParser styleParser = new StyleParser(customWidthMap);
+    private final List<Field> parentFields = new LinkedList<>();
 
+    private final Map<Field, List<Field>> fieldOwnership = new HashMap<>();
+
+    protected StyleParser styleParser = new StyleParser(customWidthMap);
 
     public AbstractSimpleExcelBuilder(boolean isCsvBuild) {
         convertContext = new ConvertContext(isCsvBuild);
@@ -122,7 +126,15 @@ abstract class AbstractSimpleExcelBuilder {
     protected List<Field> getFilteredFields(ClassFieldContainer classFieldContainer, Class<?>... groups) {
         ConfigurationUtil.parseConfiguration(classFieldContainer, configuration);
         this.parseGlobalStyle();
-        List<Field> preElectionFields = this.getPreElectionFields(classFieldContainer);
+        List<Field> preElectionFields = new LinkedList<>();
+        if (Objects.nonNull(fieldDisplayOrder) && !fieldDisplayOrder.isEmpty()) {
+            this.selfAdaption();
+            preElectionFields = fieldDisplayOrder.stream()
+                    .map(classFieldContainer::getFieldByName)
+                    .collect(Collectors.toList());
+        } else {
+            this.parsePreElectionFields(classFieldContainer, preElectionFields);
+        }
         List<Field> buildFields = this.getGroupFields(preElectionFields, groups);
         // 初始化标题容器
         List<String> titles = new ArrayList<>(buildFields.size());
@@ -443,35 +455,48 @@ abstract class AbstractSimpleExcelBuilder {
                 .collect(Collectors.toList());
     }
 
-    protected List<Field> getPreElectionFields(ClassFieldContainer classFieldContainer) {
-        if (Objects.nonNull(fieldDisplayOrder) && !fieldDisplayOrder.isEmpty()) {
-            this.selfAdaption();
-            return fieldDisplayOrder.stream()
-                    .map(classFieldContainer::getFieldByName)
-                    .collect(Collectors.toList());
-        }
-        List<Field> preElectionFields;
+    @SuppressWarnings("unchecked")
+    protected void parsePreElectionFields(ClassFieldContainer classFieldContainer, List<Field> preElectionFields) {
+        List<Field> electionFields;
         if (configuration.isIncludeAllField()) {
             if (configuration.isExcludeParent()) {
-                preElectionFields = classFieldContainer.getDeclaredFields();
+                electionFields = classFieldContainer.getDeclaredFields();
             } else {
-                preElectionFields = classFieldContainer.getFields();
+                electionFields = classFieldContainer.getFields();
             }
         } else {
             if (configuration.isExcludeParent()) {
-                preElectionFields = classFieldContainer.getDeclaredFields().stream()
-                        .filter(field -> field.isAnnotationPresent(ExcelColumn.class))
+                electionFields = classFieldContainer.getDeclaredFields().stream()
+                        .filter(field -> field.isAnnotationPresent(ExcelColumn.class) || field.isAnnotationPresent(MultiColumn.class))
                         .collect(Collectors.toList());
             } else {
-                preElectionFields = classFieldContainer.getFieldsByAnnotation(ExcelColumn.class);
+                electionFields = classFieldContainer.getFieldsByAnnotation(ExcelColumn.class, MultiColumn.class);
             }
         }
+        doProcessMultiField(preElectionFields, electionFields);
         if (configuration.isIgnoreStaticFields()) {
-            preElectionFields = preElectionFields.stream()
-                    .filter(field -> !Modifier.isStatic(field.getModifiers()))
-                    .collect(Collectors.toList());
+            preElectionFields.removeIf(field -> Modifier.isStatic(field.getModifiers()));
         }
-        return preElectionFields;
+    }
+
+    private void doProcessMultiField(List<Field> preElectionFields, List<Field> electionFields) {
+        for (Field field : electionFields) {
+            parentFields.add(field);
+            boolean isMultiColumn = field.isAnnotationPresent(MultiColumn.class);
+            if (!isMultiColumn) {
+                preElectionFields.add(field);
+                if (parentFields.isEmpty()) {
+                    fieldOwnership.put(field, Collections.emptyList());
+                } else {
+                    fieldOwnership.put(field, new LinkedList<>(parentFields));
+                }
+            } else {
+                Class<?> classType = field.getAnnotation(MultiColumn.class).classType();
+                ClassFieldContainer multiClassFieldContainer = ReflectUtil.getAllFieldsOfClass(classType);
+                parsePreElectionFields(multiClassFieldContainer, preElectionFields);
+            }
+            parentFields.remove(parentFields.size() - 1);
+        }
     }
 
     /**
