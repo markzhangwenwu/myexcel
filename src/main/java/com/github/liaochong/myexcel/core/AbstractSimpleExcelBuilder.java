@@ -520,23 +520,27 @@ abstract class AbstractSimpleExcelBuilder {
      */
     protected <T> List<List<Pair<? extends Class, ?>>> getRenderContent(T data, List<Field> sortedFields) {
         List<List<Pair<? extends Class, ?>>> result = new LinkedList<>();
-        List<Pair<? extends Class, ?>> rowContents = new LinkedList<>();
-        result.add(rowContents);
+        List<List<Object>> fieldValuesList = new LinkedList<>();
+        int deep = 0;
         for (Field field : sortedFields) {
-            if (field.getType().isAssignableFrom(List.class)) {
-                List list = (List) this.getFieldValue(field, data);
-                for (int i = 0; i < list.size(); i++) {
-                    List<Pair<? extends Class, ?>> rowContent = result.get(i);
-                    if (rowContent == null) {
-                        rowContent = new LinkedList<>(result.get(0));
-                        result.add(rowContent);
+            List<Object> fieldValues = this.getFieldValue(field, data);
+            fieldValuesList.add(fieldValues);
+            deep = fieldValues.size();
+        }
+        if (deep > 0) {
+            for (int i = 0; i < deep; i++) {
+                List<Pair<? extends Class, ?>> rowContents = new LinkedList<>();
+                result.add(rowContents);
+                for (int j = 0; j < sortedFields.size(); j++) {
+                    List<Object> fieldValues = fieldValuesList.get(j);
+                    Object fieldValue;
+                    if (fieldValues.size() > i) {
+                        fieldValue = fieldValues.get(i);
+                    } else {
+                        fieldValue = fieldValues.get(fieldValues.size() - 1);
                     }
-                    Object fieldValue = this.getFieldValue(field, list.get(i));
-                    doGetRenderContent(rowContent, field, fieldValue);
+                    doGetRenderContent(rowContents, sortedFields.get(j), fieldValue);
                 }
-            } else {
-                Object fieldValue = this.getFieldValue(field, data);
-                doGetRenderContent(rowContents, field, fieldValue);
             }
         }
         return result;
@@ -578,29 +582,25 @@ abstract class AbstractSimpleExcelBuilder {
 
     private List<Object> getFieldValue(Field field, Object object) {
         List<Field> parentFields = fieldOwnership.get(field);
-        Object parentObj = object;
-        Object result;
-        List<Object> dataList = new LinkedList<>();
-        for (int i = 0; i < parentFields.size(); i++) {
-            Field parentField = parentFields.get(i);
-            result = ReflectUtil.getFieldValue(parentObj, parentField);
-            if (result instanceof List) {
-                for (Object o : ((List) result)) {
-                    result = ReflectUtil.getFieldValue(o, parentField);
-                    if (result instanceof List) {
+        List<Object> parentObjs = new LinkedList<>();
+        parentObjs.add(object);
 
-                    } else {
-
+        List<Object> result = Collections.emptyList();
+        for (Field parentField : parentFields) {
+            result = new LinkedList<>();
+            for (Object parentObj : parentObjs) {
+                if (parentObj instanceof List) {
+                    for (Object o : ((List) parentObj)) {
+                        Object value = ReflectUtil.getFieldValue(o, parentField);
+                        result.add(value);
                     }
+                } else {
+                    Object value = ReflectUtil.getFieldValue(parentObj, parentField);
+                    result.add(value);
                 }
-            } else {
-                if (i == parentFields.size() - 1) {
-                    dataList.add(result);
-                    break;
-                }
-                parentObj = result;
             }
+            parentObjs = result;
         }
-        return dataList;
+        return result;
     }
 }
