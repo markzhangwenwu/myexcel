@@ -104,11 +104,16 @@ abstract class AbstractSimpleExcelBuilder {
 
     private Map<Field, ExcelColumnMapping> excelColumnMappingMap;
 
+    protected StyleParser styleParser = new StyleParser(customWidthMap);
+
+    /**
+     * multi columns
+     */
     private List<Field> parentFields = new LinkedList<>();
 
     private final Map<Field, List<Field>> fieldOwnership = new HashMap<>();
 
-    protected StyleParser styleParser = new StyleParser(customWidthMap);
+    protected boolean hasMultiColumns;
 
     public AbstractSimpleExcelBuilder(boolean isCsvBuild) {
         convertContext = new ConvertContext(isCsvBuild);
@@ -484,13 +489,14 @@ abstract class AbstractSimpleExcelBuilder {
         for (Field field : electionFields) {
             parentFields.add(field);
             boolean isMultiColumn = field.isAnnotationPresent(MultiColumn.class);
-            if (!isMultiColumn) {
-                preElectionFields.add(field);
-                fieldOwnership.put(field, new LinkedList<>(parentFields));
-            } else {
+            if (isMultiColumn) {
+                hasMultiColumns = true;
                 Class<?> classType = field.getAnnotation(MultiColumn.class).classType();
                 ClassFieldContainer multiClassFieldContainer = ReflectUtil.getAllFieldsOfClass(classType);
                 parsePreElectionFields(multiClassFieldContainer, preElectionFields);
+            } else {
+                preElectionFields.add(field);
+                fieldOwnership.put(field, new LinkedList<>(parentFields));
             }
             parentFields.remove(parentFields.size() - 1);
         }
@@ -518,7 +524,34 @@ abstract class AbstractSimpleExcelBuilder {
      * @param <T>          泛型
      * @return 结果集
      */
-    protected <T> List<List<Pair<? extends Class, ?>>> getRenderContent(T data, List<Field> sortedFields) {
+    protected <T> List<Pair<? extends Class, ?>> getRenderContent(T data, List<Field> sortedFields) {
+        return sortedFields.stream()
+                .map(field -> {
+                    Pair<? extends Class, Object> value = WriteConverterContext.convert(field, data, convertContext);
+                    if (value.getValue() != null) {
+                        return value;
+                    }
+                    String defaultValue = defaultValueMap.get(field);
+                    if (defaultValue != null) {
+                        return Pair.of(String.class, defaultValue);
+                    }
+                    if (configuration.getDefaultValue() != null) {
+                        return Pair.of(String.class, configuration.getDefaultValue());
+                    }
+                    return value;
+                })
+                .collect(Collectors.toCollection(LinkedList::new));
+    }
+
+    /**
+     * 获取需要被渲染的内容
+     *
+     * @param data         数据集合
+     * @param sortedFields 排序字段
+     * @param <T>          泛型
+     * @return 结果集
+     */
+    protected <T> List<List<Pair<? extends Class, ?>>> getRenderContentOfMulti(T data, List<Field> sortedFields) {
         List<List<Pair<? extends Class, ?>>> result = new LinkedList<>();
         List<List<Object>> fieldValuesList = new LinkedList<>();
         int deep = 0;

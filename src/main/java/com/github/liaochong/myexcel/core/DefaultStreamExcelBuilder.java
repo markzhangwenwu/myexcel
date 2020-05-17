@@ -329,15 +329,23 @@ public class DefaultStreamExcelBuilder<T> extends AbstractSimpleExcelBuilder imp
         }
         if (isMapBuild) {
             List<Pair<? extends Class, ?>> contents = assemblingMapContents((Map<String, Object>) data);
-            Tr tr = this.createTr(contents);
-            htmlToExcelStreamFactory.append(tr);
+            createTrAndAppend(contents);
         } else {
-            List<List<Pair<? extends Class, ?>>> contents = getRenderContent(data, filteredFields);
-            for (List<Pair<? extends Class, ?>> content : contents) {
-                Tr tr = this.createTr(content);
-                htmlToExcelStreamFactory.append(tr);
+            if (hasMultiColumns) {
+                List<List<Pair<? extends Class, ?>>> contents = getRenderContentOfMulti(data, filteredFields);
+                for (List<Pair<? extends Class, ?>> content : contents) {
+                    createTrAndAppend(content);
+                }
+            } else {
+                List<Pair<? extends Class, ?>> contents = getRenderContent(data, filteredFields);
+                createTrAndAppend(contents);
             }
         }
+    }
+
+    private void createTrAndAppend(List<Pair<? extends Class, ?>> content) {
+        Tr tr = this.createTr(content);
+        htmlToExcelStreamFactory.append(tr);
     }
 
     public <E> void append(String templateFilePath, Map<String, E> renderData) {

@@ -126,10 +126,8 @@ public class CsvBuilder<T> extends AbstractSimpleExcelBuilder implements Closeab
                 List<Pair<? extends Class, ?>> resolvedDataList = this.assemblingMapContents((Map<String, Object>) datum);
                 doGetRenderContent(result, resolvedDataList);
             } else {
-                List<List<Pair<? extends Class, ?>>> resolvedDataList = this.getRenderContent(datum, filteredFields);
-                for (List<Pair<? extends Class, ?>> resolveData : resolvedDataList) {
-                    doGetRenderContent(result, resolveData);
-                }
+                List<Pair<? extends Class, ?>> resolvedData = this.getRenderContent(datum, filteredFields);
+                doGetRenderContent(result, resolvedData);
             }
         }
         return result;
