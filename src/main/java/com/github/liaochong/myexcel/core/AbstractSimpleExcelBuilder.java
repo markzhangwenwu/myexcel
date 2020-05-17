@@ -527,7 +527,8 @@ abstract class AbstractSimpleExcelBuilder {
     protected <T> List<Pair<? extends Class, ?>> getRenderContent(T data, List<Field> sortedFields) {
         return sortedFields.stream()
                 .map(field -> {
-                    Pair<? extends Class, Object> value = WriteConverterContext.convert(field, data, convertContext);
+                    Object fieldValue = ReflectUtil.getFieldValue(data, field);
+                    Pair<? extends Class, Object> value = WriteConverterContext.convert(field, fieldValue, convertContext);
                     if (value.getValue() != null) {
                         return value;
                     }
@@ -558,7 +559,9 @@ abstract class AbstractSimpleExcelBuilder {
         for (Field field : sortedFields) {
             List<Object> fieldValues = this.getFieldValue(field, data);
             fieldValuesList.add(fieldValues);
-            deep = fieldValues.size();
+            if (fieldValues.size() > deep) {
+                deep = fieldValues.size();
+            }
         }
         if (deep > 0) {
             for (int i = 0; i < deep; i++) {

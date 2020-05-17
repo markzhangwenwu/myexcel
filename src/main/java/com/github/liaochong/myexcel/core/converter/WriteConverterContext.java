@@ -69,14 +69,14 @@ public class WriteConverterContext {
         }
     }
 
-    public static Pair<? extends Class, Object> convert(Field field, Object result, ConvertContext convertContext) {
-        if (result == null) {
+    public static Pair<? extends Class, Object> convert(Field field, Object fieldValue, ConvertContext convertContext) {
+        if (fieldValue == null) {
             return NULL_PAIR;
         }
         WriteConverter writeConverter = convertContext.isConvertCsv() ? CSV_CONVERTER_CACHE.get(field) : EXCEL_CONVERTER_CACHE.get(field);
         if (writeConverter == null) {
             Optional<WriteConverter> writeConverterOptional = WRITE_CONVERTER_CONTAINER.stream()
-                    .filter(pair -> (pair.getKey() == convertContext.getConverterType() || pair.getKey() == AllConverter.class) && pair.getValue().support(field, result, convertContext))
+                    .filter(pair -> (pair.getKey() == convertContext.getConverterType() || pair.getKey() == AllConverter.class) && pair.getValue().support(field, fieldValue, convertContext))
                     .map(Pair::getValue)
                     .findFirst();
             writeConverter = writeConverterOptional.isPresent() ? writeConverterOptional.get() : ORIGINAL_WRITE_CONVERTER;
@@ -86,6 +86,6 @@ public class WriteConverterContext {
                 EXCEL_CONVERTER_CACHE.cache(field, writeConverter);
             }
         }
-        return writeConverter.convert(field, result, convertContext);
+        return writeConverter.convert(field, fieldValue, convertContext);
     }
 }
